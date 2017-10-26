@@ -1,0 +1,21 @@
+#!/bin/bash 
+
+if [ "$#" -eq 1 ]; then
+	fullfile=$(basename "$1")
+	diffflag=0
+else 
+	fullfile=$(basename "$2")
+	diffflag=1
+fi
+
+filename="${fullfile%.*}"
+extension="${fullfile##*.}"
+
+latexmk -pdf -output-directory=.compfiles $fullfile; cp .compfiles/${filename}.pdf; cp .compfiles/${filename}.pdf ${filename}.pdf 
+
+if [ $diffflag -eq 1 ]; then
+	git show HEAD:$fullfile > .compfiles/previous.tex
+	latexdiff .compfiles/previous.tex $fullfile > .compfiles/diff.tex
+	cd .compfiles/ && latexmk -pdf diff.tex && cd ..
+	cp .compfiles/diff.pdf diff.pdf
+fi
