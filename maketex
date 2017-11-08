@@ -6,12 +6,10 @@ if [ "$#" -eq 1 ]; then
 elif [ "$#" -eq 2 ]; then
 	fullfile=$(basename "$2")
 	diffflag=1
-	echo "HERE 2"
 elif [ "$#" -eq 3 ]; then
 	oldfile=$(basename "$2")
 	fullfile=$(basename "$3")
 	diffflag=2
-	echo "HERE 3"
 else 
 	echo "Not supported"
 fi
@@ -25,13 +23,11 @@ latexmk -pdf -output-directory=.compfiles $fullfile; cp .compfiles/${filename}.p
 
 if [ $diffflag -eq 1 ]; then
 	git show HEAD:$fullfile > .compfiles/previous.tex
-	latexdiff .compfiles/previous.tex $fullfile > .compfiles/diff.tex
-	cd .compfiles/ && latexmk -pdf diff.tex && cd ..
-	cp .compfiles/diff.pdf diff.pdf
+	latexdiff .compfiles/previous.tex $fullfile > diff.tex
+	latexmk -pdf -output-directory=.compfiles diff.tex; cp .compfiles/diff.pdf diff.pdf
+	rm diff.tex
 elif [ $diffflag -eq 2 ]; then
-	echo $oldfile
-	echo $fullfile
-	latexdiff $oldfile $fullfile > .compfiles/diff.tex
-	cd .compfiles/ && latexmk -pdf diff.tex && cd ..
-	cp .compfiles/diff.pdf diff.pdf
+	latexdiff $oldfile $fullfile > diff.tex
+	latexmk -pdf -output-directory=.compfiles diff.tex; cp .compfiles/diff.pdf diff.pdf
+	rm diff.tex
 fi
