@@ -3,19 +3,35 @@
 if [ "$#" -eq 1 ]; then
 	fullfile=$(basename "$1")
 	diffflag=0
-else 
+elif [ "$#" -eq 2 ]; then
 	fullfile=$(basename "$2")
 	diffflag=1
+	echo "HERE 2"
+elif [ "$#" -eq 3 ]; then
+	oldfile=$(basename "$2")
+	fullfile=$(basename "$3")
+	diffflag=2
+	echo "HERE 3"
+else 
+	echo "Not supported"
 fi
 
 filename="${fullfile%.*}"
 extension="${fullfile##*.}"
 
-latexmk -pdf -output-directory=.compfiles $fullfile; cp .compfiles/${filename}.pdf; cp .compfiles/${filename}.pdf ${filename}.pdf 
+
+
+latexmk -pdf -output-directory=.compfiles $fullfile; cp .compfiles/${filename}.pdf ${filename}.pdf 
 
 if [ $diffflag -eq 1 ]; then
 	git show HEAD:$fullfile > .compfiles/previous.tex
 	latexdiff .compfiles/previous.tex $fullfile > .compfiles/diff.tex
+	cd .compfiles/ && latexmk -pdf diff.tex && cd ..
+	cp .compfiles/diff.pdf diff.pdf
+elif [ $diffflag -eq 2 ]; then
+	echo $oldfile
+	echo $fullfile
+	latexdiff $oldfile $fullfile > .compfiles/diff.tex
 	cd .compfiles/ && latexmk -pdf diff.tex && cd ..
 	cp .compfiles/diff.pdf diff.pdf
 fi
